@@ -12,12 +12,12 @@ app.use(cors());
 
 const server = new ApolloServer({
   schema
-})
+});
 
 server.applyMiddleware({
   app,
   path: '/graphql',
-})
+});
 
 const httpServer = createServer(app);
 server.installSubscriptionHandlers(httpServer);
