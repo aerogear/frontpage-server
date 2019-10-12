@@ -1,5 +1,7 @@
 import { find, filter } from 'lodash';
-import { pubsub } from './subscriptions';
+import { PubSub } from 'graphql-subscriptions';
+
+const pubsub = new PubSub();
 
 const authors = [
   { id: 1, firstName: 'Tom', lastName: 'Coleman' },
@@ -22,20 +24,20 @@ const resolveFunctions = {
     },
   },
   Mutation: {
-    upvotePost(_, { postId }) {
+    async upvotePost(_, { postId }) {
       const post = find(posts, { id: postId });
       if (!post) {
         throw new Error(`Couldn't find post with id ${postId}`);
       }
       post.votes += 1;
-      pubsub.publish('postUpvoted', post);
+      pubsub.publish('postUpvoted', { postUpvoted: post });
       return post;
     },
   },
   Subscription: {
-    postUpvoted(post) {
-      return post;
-    },
+     postUpvoted: {
+       subscribe: () => pubsub.asyncIterator(['postUpvoted']) 
+     }
   },
   Author: {
     posts(author) {
